@@ -21,8 +21,19 @@ loss(min): 2.4
 
 # About
 This model can generate Melodies.
+
 Generating a continuation from an existing piece of music is more accurate than generating a melody from scratch.
+
 You may use by marging this repository or open the following URL and execute Google colabo. 
+
 executable procedure is the following.
 
 ## How to use
+
+### Use marge
+
+1. Marge this repository.
+2. Open the this Google Drive and download MORTM model and vocab_list.json.
+3. open the convert.py module
+4. 
+
