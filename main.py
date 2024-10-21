@@ -1,5 +1,7 @@
+from mortm import constants
 import torch
 from mortm.mortm import MORTM
+import pretty_midi as pm
 import mortm.tokenizer as token
 import numpy as np
 
@@ -28,14 +30,14 @@ MORTMのバージョンは常に新しくなる為、モデルのバージョン
 
 tokenizer = token.Tokenizer(token=get_token_converter(120, TO_MUSIC), load_data="model/vocab/vocab_list.json")
 
-model = MORTM( # MORTMのモデルのハイパーパラメータを設計
+model = MORTM(
     progress=_DefaultLearningProgress(),
     vocab_size=327,
     position_length=8500,
     trans_layer=9, num_heads=32, d_model=1024,
     dim_feedforward=4096
 )
-model.load_state_dict(torch.load("model/ *** ")) # モデルをロードする。
+model.load_state_dict(torch.load("model/MORTM.1.0-beta_5_2.4117300421375822.pth")) # モデルをロードする。
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # デバイスを設定
 model.to(device)
 
@@ -47,9 +49,9 @@ model.to(device)
 !実行する際はconvert.pyモジュールを使用し、MIDIをトークンのシーケンスに変換してください。!
 '''
 
-np_notes = np.load("ex/Test1.npz")
+np_notes = np.load("ex/Sample.mid.npz")
 
-start = np_notes[f'array1'][:50]
+start = np_notes[f'array1'][:-1]
 
 '''
 一から、もしくはメロディをプログラマーが設定したい場合、以下を実行します。
@@ -67,7 +69,7 @@ print(f"First:{start}") # ロードしたシーケンスを表示
     - これは、確率の高い順番からK個のトークンを取得し、サンプリングを行います。複数存在する場合、ランダムでトークンを選びます。
 '''
 #gene = model.top_p_sampling(start, tokenizer, max_length=20, temperature=2.0)
-gene = model.top_k_sampling_with_temperature_sequence(start, max_length=500, temperature=1.1, top_k=5)
+gene = model.top_k_sampling_with_temperature_sequence(start, max_length=500, temperature=1.2, top_k=3)
 
 output = gene
 for t in output:

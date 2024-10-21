@@ -5,7 +5,7 @@ import os
 
 TARGET_PROGRAM_NUMBER = [0]
 
-tokenizer = Tokenizer(get_token_converter(120, TO_TOKEN))
+tokenizer = Tokenizer(get_token_converter(120, TO_TOKEN), load_data="model/vocab/vocab_list.json")
 
 count = 0
 con = MidiToAyaNode(tokenizer, "./ex", "Sample.mid", TARGET_PROGRAM_NUMBER)
