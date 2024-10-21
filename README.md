@@ -1,4 +1,4 @@
-# MORTM 1.0 Beta-2 Release
+# MORTM 1.0 Beta-5 Release
 
 ## Release Note
 
@@ -33,7 +33,7 @@ executable procedure is the following.
 ### Use marge
 
 1. Marge this repository.
-2. Open the this Google Drive and download MORTM model and vocab_list.json.
+2. Open the this Google Drive(https://drive.google.com/drive/folders/1vOanIV1Po09KRZfMFglWdKjACIr1chtZ?usp=sharing) and download MORTM model and vocab_list.json.
 3. open the convert.py module
 4. 
 
