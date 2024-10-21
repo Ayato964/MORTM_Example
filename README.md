@@ -34,6 +34,8 @@ executable procedure is the following.
 
 1. Marge this repository.
 2. Open the this [Google Drive](https://drive.google.com/drive/folders/1vOanIV1Po09KRZfMFglWdKjACIr1chtZ?usp=sharing) and download MORTM model and vocab_list.json.
-3. open the [convert.py](convert.py) module
-4. 
+3. open the [convert.py](convert.py) module and run.
+   You need to rewrite "Sample.mid" if convert your MIDI data.
+4. If completable execute, save NPZ file in the [ex directory](./ex/)
+5. 
 
