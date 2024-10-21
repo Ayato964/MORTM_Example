@@ -8,10 +8,15 @@
 
 ### Hyper Parameter
 d_model: 1024
+
 trans_layer: 12
+
 d_ff: 4096
+
 batch_size: 32
+
 lr : None
+
 loss(min): 2.4
 
 # About
