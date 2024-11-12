@@ -1,3 +1,5 @@
+from typing import List
+
 from mortm import constants
 import torch
 from mortm.mortm import MORTM
@@ -5,11 +7,10 @@ import pretty_midi as pm
 import mortm.tokenizer as token
 import numpy as np
 
-from mortm.tokenizer import TO_TOKEN, TO_MUSIC
-
+from converter_types import get_token_converter_mortv2
+from mortm.tokenizer import get_token_converter, TO_MUSIC
 from mortm.progress import _DefaultLearningProgress
-from mortm.tokenizer import get_token_converter
-from mortm.de_convert import ct_tokens_to_midi
+from mortm.de_convert import ct_token_to_midi
 
 '''
 MORTMのバージョンは常に新しくなる為、モデルのバージョンとvocab_list.jsonを確認してください。
@@ -28,16 +29,18 @@ MORTMのバージョンは常に新しくなる為、モデルのバージョン
     モデルによって異なるので、再度確認してください。
 '''
 
-tokenizer = token.Tokenizer(token=get_token_converter(120, TO_MUSIC), load_data="model/vocab/vocab_list.json")
+
+
+tokenizer = token.Tokenizer(token=get_token_converter(TO_MUSIC), load_data="model/vocab/vocab_list.json")
 
 model = MORTM(
     progress=_DefaultLearningProgress(),
-    vocab_size=327,
+    vocab_size=518,
     position_length=8500,
     trans_layer=9, num_heads=32, d_model=1024,
     dim_feedforward=4096
 )
-model.load_state_dict(torch.load("model/MORTM.1.0-beta_5_2.4117300421375822.pth")) # モデルをロードする。
+model.load_state_dict(torch.load("model/MORTM.train.1.2.2284.pth")) # モデルをロードする。
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # デバイスを設定
 model.to(device)
 
@@ -49,7 +52,7 @@ model.to(device)
 !実行する際はconvert.pyモジュールを使用し、MIDIをトークンのシーケンスに変換してください。!
 '''
 
-np_notes = np.load("ex/Sample.mid.npz")
+np_notes = np.load("ex/Sample2.mid.npz")
 
 start = np_notes[f'array1'][:-1]
 
@@ -68,8 +71,9 @@ print(f"First:{start}") # ロードしたシーケンスを表示
 2. Top K sampling
     - これは、確率の高い順番からK個のトークンを取得し、サンプリングを行います。複数存在する場合、ランダムでトークンを選びます。
 '''
-#gene = model.top_p_sampling(start, tokenizer, max_length=20, temperature=2.0)
-gene = model.top_k_sampling_with_temperature_sequence(start, max_length=500, temperature=1.2, top_k=3)
+
+#gene = model.top_p_sampling_length(torch.tensor(start, dtype=torch.long, device=device).unsqueeze(0), p=0.8, temperature=1.0, max_length=500)
+gene = model.top_k_sampling_length_encoder(start, max_length=600, temperature=1.0, top_k=8)
 
 output = gene
 for t in output:
@@ -77,4 +81,4 @@ for t in output:
     print(f"{t}  {tokenizer.rev_get(t.tolist())}")
 
 
-midi = ct_tokens_to_midi(tokenizer, output, "out/generate_test.midi") #生成したトークンをMIDIに変換する。
+midi = ct_token_to_midi(tokenizer, output, "out/generate_test.midi") #生成したトークンをMIDIに変換する。
