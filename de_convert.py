@@ -6,7 +6,7 @@ import torch
 
 tokenizer = Tokenizer(get_token_converter( TO_MUSIC), "./model/vocab/vocab_list.json")
 
-output = np.load("./ex/Sample2.mid.npz")['array1']
+output = np.load("./ex/Sample.mid.npz")['array1']
 
 output = torch.tensor(output.tolist())
 

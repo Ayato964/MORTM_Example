@@ -1,17 +1,13 @@
-from typing import List
-
 from mortm import constants
 import torch
 from mortm.mortm import MORTM
-import pretty_midi as pm
 import mortm.tokenizer as token
 import numpy as np
 
-from converter_types import get_token_converter_mortv2
 from mortm.tokenizer import get_token_converter, TO_MUSIC
 from mortm.progress import _DefaultLearningProgress
 from mortm.de_convert import ct_token_to_midi
-
+from mortm.generate import generate_note
 '''
 MORTMのバージョンは常に新しくなる為、モデルのバージョンとvocab_list.jsonを確認してください。
 うまくメロディが生成できない場合や、エラーが発生する場合、以下の項目を確認してください。
@@ -29,8 +25,6 @@ MORTMのバージョンは常に新しくなる為、モデルのバージョン
     モデルによって異なるので、再度確認してください。
 '''
 
-
-
 tokenizer = token.Tokenizer(token=get_token_converter(TO_MUSIC), load_data="model/vocab/vocab_list.json")
 
 model = MORTM(
@@ -40,7 +34,7 @@ model = MORTM(
     trans_layer=9, num_heads=32, d_model=1024,
     dim_feedforward=4096
 )
-model.load_state_dict(torch.load("model/MORTM.train.1.2.2284.pth")) # モデルをロードする。
+model.load_state_dict(torch.load("model/MORTMv3.1.2-Sax.pth")) # モデルをロードする。
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # デバイスを設定
 model.to(device)
 
@@ -52,9 +46,9 @@ model.to(device)
 !実行する際はconvert.pyモジュールを使用し、MIDIをトークンのシーケンスに変換してください。!
 '''
 
-np_notes = np.load("ex/Sample2.mid.npz")
+np_notes = np.load("ex/Sample4.mid.npz")
 
-start = np_notes[f'array1'][:-1]
+start = np_notes[f'array1']
 
 '''
 一から、もしくはメロディをプログラマーが設定したい場合、以下を実行します。
@@ -62,7 +56,7 @@ start = np_notes[f'array1'][:-1]
 '''
 #start = [tokenizer.get(constants.START_SEQ_TOKEN)]
 
-print(f"First:{start}") # ロードしたシーケンスを表示
+print(f"First:{start}", f"Length:{len(start)}") # ロードしたシーケンスを表示
 
 '''
 シーケンスの生成は以下の2つから選べます。
@@ -71,11 +65,12 @@ print(f"First:{start}") # ロードしたシーケンスを表示
 2. Top K sampling
     - これは、確率の高い順番からK個のトークンを取得し、サンプリングを行います。複数存在する場合、ランダムでトークンを選びます。
 '''
-
-#gene = model.top_p_sampling_length(torch.tensor(start, dtype=torch.long, device=device).unsqueeze(0), p=0.8, temperature=1.0, max_length=500)
-gene = model.top_k_sampling_length_encoder(start, max_length=600, temperature=1.0, top_k=8)
+#gene = model.top_p_sampling_length(start, max_length=500, p=0.95, temperature=1.1)
+#gene, _ = model.top_k_sampling_length_encoder(start, max_length=500, temperature=0.1, top_k=1)
+gene = generate_note(150, start, model, t=1.05, p=0.95)
 
 output = gene
+print(output)
 for t in output:
     t: torch.Tensor = t
     print(f"{t}  {tokenizer.rev_get(t.tolist())}")
