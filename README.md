@@ -1,23 +1,25 @@
-# MORTM 1.0 Beta-5 Release
-
+# MORTM 2.0t4 Release
 ## Release Note
-
-### 2024/10/17
-* New tokenizer and reduced noise.
-* Expression increased.
-
+### 2025/01/14
+* Added the decoder on the MORTM
+* Changed melodic generation method because added decoder on the MORTM.
+  
 ### Hyper Parameter
-d_model: 1024
+d_model: 768
 
-trans_layer: 12
+encoder_layer: 15
 
-d_ff: 4096
+decoder_layer: 15
 
-batch_size: 32
+d_ff: 3072
+
+n_head: 12
+
+batch_size: 16
 
 lr : None
 
-loss(min): 2.4
+loss(min): 0.25
 
 # About
 This model can generate Melodies.
