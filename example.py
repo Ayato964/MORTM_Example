@@ -31,13 +31,13 @@ MORTMのバージョンは常に新しくなる為、モデルのバージョン
 
 
 
-tokenizer = token.Tokenizer(token=get_token_converter(TO_MUSIC), load_data="model/vocab/vocab_list.json")
-
+tokenizer = token.Tokenizer(get_token_converter(TO_MUSIC))
+tokenizer.rev_mode()
 model = MORTM(
     progress=_DefaultLearningProgress(),
     vocab_size=393
 )
-model.load_state_dict(torch.load("model/MORTM.1.1.1.6562.pth")) # モデルをロードする。
+model.load_state_dict(torch.load("model/MORTM.2.0-SMALL-LITE_0.25.pth")) # モデルをロードする。
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # デバイスを設定
 model.to(device)
 
@@ -49,9 +49,9 @@ model.to(device)
 !実行する際はconvert.pyモジュールを使用し、MIDIをトークンのシーケンスに変換してください。!
 '''
 
-np_notes = np.load("ex/Sample.mid.npz")
+np_notes = np.load("ex/Sample4.mid.npz")
 
-start = np_notes[f'array1'][:-1]
+start = np_notes[f'array1']
 
 '''
 一から、もしくはメロディをプログラマーが設定したい場合、以下を実行します。
@@ -67,10 +67,7 @@ print(f"First:{start}   {len(start)}") # ロードしたシーケンスを表示
 2. Top K sampling
     - これは、確率の高い順番からK個のトークンを取得し、サンプリングを行います。複数存在する場合、ランダムでトークンを選びます。
 '''
-
-#gene, _ = model.top_k_sampling_length_encoder(start, max_length=300, temperature=0.1, top_k=1)
-#gene = model.top_p_sampling_length(start, max_length=200, p=0.95, temperature=1.1)
-gene = generate_note(input_seq=start, note_max=200, model=model, p=0.95, t=1.1)
+gene = model.top_p_sampling_measure(start, p=0.95, max_measure=5, temperature=1.0)
 output = gene
 for t in output:
     t: torch.Tensor = t
