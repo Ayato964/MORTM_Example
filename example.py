@@ -11,7 +11,7 @@ from converter_types import get_token_converter_mortv2
 from mortm.tokenizer import get_token_converter, TO_MUSIC
 from mortm.progress import _DefaultLearningProgress
 from mortm.de_convert import ct_token_to_midi
-
+from mortm.generate import generate_note
 '''
 MORTMのバージョンは常に新しくなる為、モデルのバージョンとvocab_list.jsonを確認してください。
 うまくメロディが生成できない場合や、エラーが発生する場合、以下の項目を確認してください。
@@ -35,12 +35,9 @@ tokenizer = token.Tokenizer(token=get_token_converter(TO_MUSIC), load_data="mode
 
 model = MORTM(
     progress=_DefaultLearningProgress(),
-    vocab_size=518,
-    position_length=8500,
-    trans_layer=9, num_heads=32, d_model=1024,
-    dim_feedforward=4096
+    vocab_size=393
 )
-model.load_state_dict(torch.load("model/MORTM.train.1.2.2284.pth")) # モデルをロードする。
+model.load_state_dict(torch.load("model/MORTM.1.1.1.6562.pth")) # モデルをロードする。
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # デバイスを設定
 model.to(device)
 
@@ -52,7 +49,7 @@ model.to(device)
 !実行する際はconvert.pyモジュールを使用し、MIDIをトークンのシーケンスに変換してください。!
 '''
 
-np_notes = np.load("ex/Sample2.mid.npz")
+np_notes = np.load("ex/Sample.mid.npz")
 
 start = np_notes[f'array1'][:-1]
 
@@ -62,8 +59,7 @@ start = np_notes[f'array1'][:-1]
 '''
 #start = [tokenizer.get(constants.START_SEQ_TOKEN)]
 
-print(f"First:{start}") # ロードしたシーケンスを表示
-
+print(f"First:{start}   {len(start)}") # ロードしたシーケンスを表示
 '''
 シーケンスの生成は以下の2つから選べます。
 1. Top P sampling
@@ -72,9 +68,9 @@ print(f"First:{start}") # ロードしたシーケンスを表示
     - これは、確率の高い順番からK個のトークンを取得し、サンプリングを行います。複数存在する場合、ランダムでトークンを選びます。
 '''
 
-#gene = model.top_p_sampling_length(torch.tensor(start, dtype=torch.long, device=device).unsqueeze(0), p=0.8, temperature=1.0, max_length=500)
-gene = model.top_k_sampling_length_encoder(start, max_length=600, temperature=1.0, top_k=8)
-
+#gene, _ = model.top_k_sampling_length_encoder(start, max_length=300, temperature=0.1, top_k=1)
+#gene = model.top_p_sampling_length(start, max_length=200, p=0.95, temperature=1.1)
+gene = generate_note(input_seq=start, note_max=200, model=model, p=0.95, t=1.1)
 output = gene
 for t in output:
     t: torch.Tensor = t

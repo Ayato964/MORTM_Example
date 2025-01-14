@@ -4,11 +4,11 @@ import numpy as np
 import torch
 
 
-tokenizer = Tokenizer(get_token_converter( TO_MUSIC), "./model/vocab/vocab_list.json")
-
-output = np.load("./ex/Sample2.mid.npz")['array1']
+tokenizer = Tokenizer(get_token_converter( TO_MUSIC))
+tokenizer.rev_mode()
+output = np.load("./ex/Sample4.mid.npz")['array1']
 
 output = torch.tensor(output.tolist())
 
 print(output)
-midi = ct_token_to_midi(tokenizer, output, "out/generate_test.midi")
+midi = ct_token_to_midi(tokenizer, output, "out/generate_test.midi", program=65)
